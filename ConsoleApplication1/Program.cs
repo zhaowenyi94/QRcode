@@ -12,27 +12,15 @@ namespace ConsoleApplication1
 {
     class Program
     {
-        static void toGrey(Bitmap rsc)//grey
-        {
-            for (int i = 0; i < rsc.Width; i++)
-            {
-                for (int j = 0; j < rsc.Height; j++)
-                {
-                    Color pixelColor = rsc.GetPixel(i, j);
-                    int grey = (int)(0.299 * pixelColor.R + 0.587 * pixelColor.G + 0.114 * pixelColor.B);
-                    Color newColor = Color.FromArgb(grey, grey, grey);
-                    rsc.SetPixel(i, j, newColor);
-                }
-            }
-        }
-        public static Bitmap GetGrayImage(Bitmap srcBmp)
+        //RGBBitmap转灰度BitMap
+        static Bitmap GetGrayImage(Bitmap srcBmp)
         {
             Rectangle rect = new Rectangle(0, 0, srcBmp.Width, srcBmp.Height);
-            BitmapData srcBmpData = srcBmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
-            IntPtr srcPtr = srcBmpData.Scan0;
-            int scanWidth = srcBmpData.Width * 3;
-            int src_bytes = scanWidth * srcBmp.Height;
-            byte[] srcRGBValues = new byte[src_bytes];
+            BitmapData srcBmpData = srcBmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);//用Bitmapdata对bitmap做操作
+            IntPtr srcPtr = srcBmpData.Scan0;//初始位置指针
+            int scanWidth = srcBmpData.Width * 3;//扫描宽度，每个像素三通道，故乘3
+            int src_bytes = scanWidth * srcBmp.Height;//总字节数
+            byte[] srcRGBValues = new byte[src_bytes];//建立一维byte数组储存RGB图像数据
             Marshal.Copy(srcPtr, srcRGBValues, 0, src_bytes);
             //灰度化处理  
             int k = 0;
@@ -57,7 +45,8 @@ namespace ConsoleApplication1
             srcBmp.UnlockBits(srcBmpData);
             return srcBmp;
         }
-        public static byte[,] GetGrayArray2D(Bitmap srcBmp)
+        //Bitmap转灰度二值数组
+        static byte[,] GetGrayArray2D(Bitmap srcBmp)
         {
             Rectangle rect = new Rectangle(0, 0, srcBmp.Width, srcBmp.Height);
             BitmapData srcBmpData = srcBmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
