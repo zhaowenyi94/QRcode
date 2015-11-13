@@ -150,32 +150,66 @@ namespace ConsoleApplication1
                 }
             }
         }
-        //找到坐标点
-        static void Processing(Bitmap curBitmap)
+
+        //建立PxlCounter矩阵
+        static double[,] countPxl(Bitmap rsc, bool type)
         {
-            if (curBitmap != null)
+            int width, height;
+            if (!type)//type为非，行处理
             {
-                double[,] process = new double[curBitmap.Height, curBitmap.Width];
-                for (int j = 0; j < curBitmap.Height; j++)
+                width = rsc.Width;
+                height = rsc.Height;
+            }
+            else//type为真，列处理
+            {
+                width = rsc.Height;
+                height = rsc.Width;
+            }
+           
+            double[,] PxlCounter = new double[height, width];
+            for (int j = 0; j < height; j++)
+            {
+                int i = 0;
+                int counter = -1;
+                int sum = 1;
+                while (i < width)
                 {
-                    int i = 0;
-                    int counter = -1;
-                    int sum = 1;
-                    while (i < curBitmap.Width)
+                    if (!type)
                     {
-                        while (i < curBitmap.Width - 1 && (curBitmap.GetPixel(i, j)).R == (curBitmap.GetPixel(i + 1, j)).R)
+                        while (i < width - 1 && (rsc.GetPixel(i, j)).R == (rsc.GetPixel(i + 1, j)).R)
                         {
                             sum = sum + 1;
                             i = i + 1;
                         }
                         counter = counter + 1;
-                        process[j, counter] = sum;
+                        PxlCounter[j, counter] = sum;
+                        sum = 1;
+                        i = i + 1;
+                    }
+                    else
+                    {
+                        while ((i < width - 1) && (rsc.GetPixel(j,i)).R == (rsc.GetPixel(j,i+1)).R)
+                        {
+                            sum = sum + 1;
+                            i = i + 1;
+                        }
+                        counter = counter + 1;
+                        PxlCounter[counter,j] = sum;
                         sum = 1;
                         i = i + 1;
                     }
                 }
-
-                //得到了process
+            }
+            return PxlCounter;
+        }
+        
+        //找到坐标点
+        static void Processing(Bitmap curBitmap)
+        {
+            if (curBitmap != null)
+            {
+                //行处理
+                double[,] process = countPxl(curBitmap,false);
                 double[,] suitratio = new double[1000, 1000];
                 int sum1 = 0;//sum1是之前的横坐标数目
                 for (int row = 0; row < curBitmap.Height; row++)
@@ -187,7 +221,6 @@ namespace ConsoleApplication1
                         {
                             select[i] = process[row, col + i];
                         }
-
                         double max = select.Max();
                         double selectsum = select.Sum();
                         double baselen = (selectsum - max) / 4;
@@ -225,7 +258,7 @@ namespace ConsoleApplication1
                 }//end of  process过后的 行处理
 
 
-                double[,] process1 = new double[1000, 1000];
+                double[,] process1 = new double[1000,1000];
                 for (int j = 0; j < curBitmap.Width; j++)
                 {
                     int i = 0;
@@ -347,9 +380,6 @@ namespace ConsoleApplication1
                 Console.WriteLine(str);
             }
         }
-
-
-
 
         //主函数
         static void Main(string[] args)
